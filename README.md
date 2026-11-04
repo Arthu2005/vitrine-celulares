@@ -2,6 +2,8 @@
 
 Vitrine pública com exploração 3D, comparador, assistente de escolha e contato pelo WhatsApp, mais um painel em `/admin` para a loja cuidar de tudo sem programador. Não há checkout: a venda acontece na conversa ou na loja.
 
+**Demonstração no ar:** https://arthu2005.github.io/vitrine-celulares/ (dados fictícios, sem o painel)
+
 - Proposta criativa e arquitetura: [docs/PROPOSTA.md](docs/PROPOSTA.md)
 - Identidade visual: [DESIGN.md](DESIGN.md)
 - Guia para o proprietário: [docs/GUIA-DO-PROPRIETARIO.md](docs/GUIA-DO-PROPRIETARIO.md)
@@ -101,7 +103,7 @@ npm run serve:pages
 - driver S3 e banco Turso: o código existe, mas não foi executado contra serviços reais;
 - envio real de e-mail pelo Resend: sem a chave, o link de recuperação aparece no log do servidor, e foi assim que o fluxo foi testado;
 - `Dockerfile`: o Docker não estava disponível no ambiente de desenvolvimento;
-- publicação em domínio real.
+- publicação com servidor em domínio próprio: só a demonstração estática foi publicada, no GitHub Pages.
 
 **Limitações conhecidas:**
 
