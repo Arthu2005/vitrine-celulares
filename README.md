@@ -93,13 +93,14 @@ npm run serve:pages
 
 `npm run test:e2e` roda sobre o build de produção, com banco e arquivos isolados: catálogo, filtros, busca, variantes, mensagens de WhatsApp, 3D, 360°, comparador, assistente, favoritos, login, bloqueio de tentativas, recuperação de senha, perfis, upload, recusa de arquivos falsos, rascunho, prévia, publicação, despublicação, exclusão, persistência após reiniciar o servidor, remoção da demonstração e ausência de rolagem horizontal em 320, 390, 768 e 1280 px.
 
+A imagem de produção é construída e testada pelo workflow `.github/workflows/docker.yml`: recusa iniciar sem senha, inicia em disco novo, serve páginas e arquivos, usa o endereço público e mantém os dados em um novo contêiner.
+
 **Não testado:**
 
 - aparelhos físicos: a parte móvel foi validada por emulação no navegador, sem iPhone ou Android reais;
 - driver S3 e banco Turso: o código existe, mas não foi executado contra serviços reais;
 - envio real de e-mail pelo Resend: sem a chave, o link de recuperação aparece no log do servidor, e foi assim que o fluxo foi testado;
-- `Dockerfile`: o Docker não estava disponível no ambiente de desenvolvimento;
-- publicação com servidor em domínio próprio: só a demonstração estática foi publicada, no GitHub Pages.
+- publicação real na Railway ou em domínio próprio.
 
 **Limitações conhecidas:**
 
