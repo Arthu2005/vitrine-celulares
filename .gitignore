@@ -5,6 +5,7 @@ next-env.d.ts
 *.tsbuildinfo
 .env
 .env.local
+.env.producao
 data/*.db*
 storage/
 tmp/

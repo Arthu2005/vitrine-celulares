@@ -1,0 +1,44 @@
+name: Testar imagem de produção
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - Dockerfile
+      - .dockerignore
+      - package-lock.json
+      - scripts/first-run.ts
+      - scripts/seed.ts
+      - .github/workflows/docker.yml
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - run: docker build -t vitrine .
+      - name: Recusa a primeira inicialização sem senha do administrador
+        run: |
+          if docker run --rm -v vazio:/data vitrine; then exit 1; fi
+      - name: Inicia em disco novo
+        run: |
+          docker run -d --name app -p 3000:3000 -v loja:/data -e SITE_URL=https://loja.exemplo.test \
+            -e ADMIN_EMAIL=dono@exemplo.test -e ADMIN_PASSWORD="$(openssl rand -hex 16)" vitrine
+          curl -sf --retry 30 --retry-delay 3 --retry-all-errors -o /dev/null http://localhost:3000/ || { docker logs app; exit 1; }
+      - name: Confere páginas, endereço e arquivos
+        run: |
+          curl -sf http://localhost:3000/admin/login | grep -q 'Painel da loja'
+          curl -sf http://localhost:3000/robots.txt | grep -q 'https://loja.exemplo.test/sitemap.xml'
+          media=$(curl -sf http://localhost:3000/ | grep -o '/media/[^"& ]*\.webp' | head -1)
+          test -n "$media"
+          curl -sf -o /dev/null "http://localhost:3000$media"
+      - name: Mantém os dados em um novo contêiner, sem a senha inicial
+        run: |
+          docker rm -f app
+          docker run -d --name app -p 3000:3000 -v loja:/data vitrine
+          curl -sf --retry 30 --retry-delay 3 --retry-all-errors -o /dev/null http://localhost:3000/celulares || { docker logs app; exit 1; }
+          curl -sf http://localhost:3000/celulares | grep -q 'aurora-x1-pro'

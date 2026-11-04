@@ -1,7 +1,14 @@
 node_modules
 .next
+.git
+.github
+.claude
+.pages-hold
+out
 data
 storage
 tmp
+public/media
 .env
-.env.local
+.env.*
+*.tsbuildinfo

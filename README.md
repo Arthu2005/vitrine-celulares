@@ -40,6 +40,7 @@ Vitrine em `http://localhost:3000`, painel em `http://localhost:3000/admin`.
 | --- | --- |
 | `npm run dev` | Desenvolvimento |
 | `npm run build` e `npm start` | Versão de produção |
+| `npm run start:prod` | Atualiza o banco, prepara a primeira inicialização e inicia o servidor de produção |
 | `npm run db:migrate` | Aplica migrações do banco |
 | `npm run db:generate` | Gera migração após alterar `src/lib/db/schema.ts` |
 | `npm run db:seed` | Carga inicial (`-- --reset` apaga tudo e recomeça) |
@@ -51,20 +52,15 @@ Vitrine em `http://localhost:3000`, painel em `http://localhost:3000/admin`.
 
 ### Recomendado: um servidor com disco persistente
 
-É o caminho mais simples e barato para uma loja: banco SQLite e arquivos no mesmo disco. Serve qualquer VPS ou plataforma com volume persistente (Railway, Render, Fly.io).
+É o caminho mais simples e barato para uma loja: banco SQLite e arquivos no mesmo disco. O passo a passo está em [docs/PUBLICAR-PAINEL.md](docs/PUBLICAR-PAINEL.md), com a Railway como exemplo. O `Dockerfile` também serve para outra plataforma ou VPS.
 
-1. Use o `Dockerfile` do projeto, ou rode `npm ci`, `npm run build`, `npm run db:migrate` e `npm start`.
-2. Monte volumes persistentes em `/app/data` (banco) e `/app/storage` (arquivos).
-3. Defina as variáveis de ambiente:
-   - `NEXT_PUBLIC_SITE_URL=https://seudominio.com.br` **antes do build**, pois ela é gravada no código do navegador e aparece nos links do WhatsApp;
-   - `ADMIN_EMAIL`, `ADMIN_PASSWORD`;
-   - `RESEND_API_KEY` e `EMAIL_FROM` para a recuperação de senha por e-mail.
-4. Na primeira publicação, sem dados de demonstração:
-   ```bash
-   npx tsx scripts/seed.ts --sem-demo
-   ```
-5. Aponte o domínio e ative HTTPS na plataforma. O cookie de sessão passa a exigir HTTPS automaticamente quando `NEXT_PUBLIC_SITE_URL` começa com `https`.
-6. Faça backup periódico das pastas `data/` e `storage/`.
+1. Monte um disco persistente em `/data`.
+2. Defina `ADMIN_EMAIL` e `ADMIN_PASSWORD` (12 caracteres ou mais). Elas só são usadas na primeira inicialização, que também carrega a demonstração.
+3. Defina `SITE_URL=https://seudominio.com.br`. Na Railway, sem domínio próprio, o endereço é detectado sozinho. Ele é usado em links, SEO e e-mails, e o cookie de sessão passa a exigir HTTPS quando começa com `https`.
+4. Para a recuperação de senha por e-mail, defina `RESEND_API_KEY` e `EMAIL_FROM`.
+5. Rode uma cópia do servidor por vez e faça backup periódico do disco.
+
+Sem Docker, use `npm ci`, `npm run build` e `npm run start:prod`, com `DATABASE_URL` e `STORAGE_LOCAL_DIR` apontando para o disco.
 
 ### Alternativa: Vercel + Turso + armazenamento S3
 
