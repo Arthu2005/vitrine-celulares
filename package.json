@@ -1,0 +1,55 @@
+{
+  "name": "vitrine-celulares",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "db:seed": "tsx scripts/seed.ts",
+    "admin:create": "tsx scripts/create-admin.ts",
+    "demo:models": "tsx scripts/generate-demo-models.ts",
+    "demo:render": "tsx scripts/render-demo-media.ts",
+    "test:e2e": "tsx scripts/e2e.ts",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx scripts/db-migrate.ts",
+    "setup": "npm run db:migrate && npm run db:seed",
+    "build:pages": "tsx scripts/build-pages.ts",
+    "serve:pages": "tsx scripts/serve-pages.ts"
+  },
+  "dependencies": {
+    "@libsql/client": "^0.18.0",
+    "@react-three/drei": "^10.7.9",
+    "@react-three/fiber": "^9.8.2",
+    "aws4fetch": "^1.0.20",
+    "drizzle-orm": "^0.45.4",
+    "lucide-react": "^1.68.0",
+    "motion": "^14.9.1",
+    "next": "^16.4.5",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "sharp": "^0.35.5",
+    "three": "^0.187.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@gltf-transform/core": "^4.5.1",
+    "@gltf-transform/extensions": "^4.5.1",
+    "@tailwindcss/postcss": "^4.3.4",
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@types/three": "^0.187.0",
+    "drizzle-kit": "^0.31.11",
+    "esbuild": "^0.28.2",
+    "playwright-core": "^1.64.1",
+    "tailwindcss": "^4.3.4",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  },
+  "engines": {
+    "node": ">=20.9"
+  }
+}
