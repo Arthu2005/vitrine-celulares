@@ -4,7 +4,9 @@ import { and, eq, gt, isNull, lt } from 'drizzle-orm'
 import { cookies, headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { cache } from 'react'
+import { requestIp } from './client-ip'
 import { db, schema } from './db'
+import { siteUrl } from './whatsapp'
 
 const scrypt = promisify(scryptCb) as (password: string, salt: Buffer, keylen: number, opts: object) => Promise<Buffer>
 
@@ -34,8 +36,7 @@ const MAX_ATTEMPTS = 5
 const WINDOW_MS = 15 * 60 * 1000
 
 export async function clientIp() {
-  const h = await headers()
-  return h.get('x-forwarded-for')?.split(',')[0]?.trim() || h.get('x-real-ip') || 'local'
+  return requestIp(await headers())
 }
 
 export async function isLimited(key: string) {
@@ -61,7 +62,7 @@ export async function createSession(userId: string) {
   jar.set(SESSION_COOKIE, token, {
     httpOnly: true,
     sameSite: 'lax',
-    secure: (process.env.NEXT_PUBLIC_SITE_URL ?? '').startsWith('https'),
+    secure: siteUrl().startsWith('https'),
     path: '/',
     expires: new Date(expiresAt),
   })

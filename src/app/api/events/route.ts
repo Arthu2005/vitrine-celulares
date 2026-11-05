@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
+import { requestIp } from '@/lib/client-ip'
 import { EVENT_TYPES } from '@/lib/constants'
 import { db, schema } from '@/lib/db'
 
@@ -14,7 +15,7 @@ const body = z.object({
 const hits = new Map<string, { n: number; at: number }>()
 
 export async function POST(req: Request) {
-  const ip = req.headers.get('x-forwarded-for')?.split(',')[0] ?? 'local'
+  const ip = requestIp(req.headers)
   const now = Date.now()
   const hit = hits.get(ip)
   if (!hit || now - hit.at > 60_000) hits.set(ip, { n: 1, at: now })
