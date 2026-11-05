@@ -9,6 +9,8 @@ on:
       - package-lock.json
       - scripts/first-run.ts
       - scripts/seed.ts
+      - src/lib/storage.ts
+      - drizzle/**
       - .github/workflows/docker.yml
 
 permissions:
@@ -42,3 +44,36 @@ jobs:
           docker run -d --name app -p 3000:3000 -v loja:/data vitrine
           curl -sf --retry 30 --retry-delay 3 --retry-all-errors -o /dev/null http://localhost:3000/celulares || { docker logs app; exit 1; }
           curl -sf http://localhost:3000/celulares | grep -q 'aurora-x1-pro'
+
+  remote-database:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - run: docker build -t vitrine .
+      - name: Inicia o banco remoto
+        run: |
+          docker network create loja
+          docker run -d --name sqld --network loja ghcr.io/tursodatabase/libsql-server:latest
+      - name: Inicia sem disco, com os arquivos no banco
+        run: |
+          docker run -d --name app --network loja -p 3000:3000 -e STORAGE_DRIVER=database -e DATABASE_URL=http://sqld:8080 \
+            -e RENDER_EXTERNAL_URL=https://loja.exemplo.test -e ADMIN_EMAIL=dono@exemplo.test -e ADMIN_PASSWORD="$(openssl rand -hex 16)" vitrine
+          curl -sf --retry 40 --retry-delay 3 --retry-all-errors -o /dev/null http://localhost:3000/ || { docker logs app; exit 1; }
+      - name: Confere endereço, arquivos e leitura parcial
+        run: |
+          curl -sf http://localhost:3000/robots.txt | grep -q 'https://loja.exemplo.test/sitemap.xml'
+          media=$(curl -sf http://localhost:3000/ | grep -o '/media/[^"& ]*\.webp' | head -1)
+          test -n "$media"
+          curl -sf -o inteiro "http://localhost:3000$media"
+          test "$(curl -s -o parcial -w '%{http_code}' -r 10-109 "http://localhost:3000$media")" = 206
+          test "$(wc -c < parcial)" = 100
+          cmp parcial <(tail -c +11 inteiro | head -c 100)
+      - name: Mantém dados e arquivos ao trocar de contêiner
+        run: |
+          media=$(curl -sf http://localhost:3000/ | grep -o '/media/[^"& ]*\.webp' | head -1)
+          docker rm -f app
+          docker run -d --name app --network loja -p 3000:3000 -e STORAGE_DRIVER=database -e DATABASE_URL=http://sqld:8080 vitrine
+          curl -sf --retry 40 --retry-delay 3 --retry-all-errors -o /dev/null http://localhost:3000/celulares || { docker logs app; exit 1; }
+          curl -sf http://localhost:3000/celulares | grep -q 'aurora-x1-pro'
+          curl -sf -o /dev/null "http://localhost:3000$media"

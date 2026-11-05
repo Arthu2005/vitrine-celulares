@@ -50,21 +50,25 @@ Vitrine em `http://localhost:3000`, painel em `http://localhost:3000/admin`.
 
 ## Publicar
 
-### Recomendado: um servidor com disco persistente
+O passo a passo está em [docs/PUBLICAR-PAINEL.md](docs/PUBLICAR-PAINEL.md).
 
-É o caminho mais simples e barato para uma loja: banco SQLite e arquivos no mesmo disco. O passo a passo está em [docs/PUBLICAR-PAINEL.md](docs/PUBLICAR-PAINEL.md), com a Railway como exemplo. O `Dockerfile` também serve para outra plataforma ou VPS.
+### Grátis: Render + Turso
+
+O servidor roda na Render, e o banco e as fotos ficam no Turso (`STORAGE_DRIVER=database`), porque o disco da Render grátis é apagado a cada reinício. O servidor dorme depois de 15 minutos sem visitas e leva cerca de 1 minuto para acordar. O arquivo `render.yaml` já descreve o serviço.
+
+A Vercel não é uma opção grátis aqui: o plano Hobby proíbe uso comercial, e ela recusa envios acima de 4,5 MB.
+
+### Pago: um servidor com disco persistente
+
+Banco SQLite e arquivos no mesmo disco, sem espera no primeiro acesso. Serve para Railway (`railway.json`) ou outro serviço com contêiner.
 
 1. Monte um disco persistente em `/data`.
 2. Defina `ADMIN_EMAIL` e `ADMIN_PASSWORD` (12 caracteres ou mais). Elas só são usadas na primeira inicialização, que também carrega a demonstração.
-3. Defina `SITE_URL=https://seudominio.com.br`. Na Railway, sem domínio próprio, o endereço é detectado sozinho. Ele é usado em links, SEO e e-mails, e o cookie de sessão passa a exigir HTTPS quando começa com `https`.
+3. Fora da Railway e da Render, defina `SITE_URL=https://seudominio.com.br`. Ele é usado em links, SEO e e-mails, e o cookie de sessão passa a exigir HTTPS quando começa com `https`.
 4. Para a recuperação de senha por e-mail, defina `RESEND_API_KEY` e `EMAIL_FROM`.
 5. Rode uma cópia do servidor por vez e faça backup periódico do disco.
 
 Sem Docker, use `npm ci`, `npm run build` e `npm run start:prod`, com `DATABASE_URL` e `STORAGE_LOCAL_DIR` apontando para o disco.
-
-### Alternativa: Vercel + Turso + armazenamento S3
-
-Defina `DATABASE_URL=libsql://...`, `DATABASE_AUTH_TOKEN`, `STORAGE_DRIVER=s3` e as variáveis `S3_*` (Cloudflare R2, Supabase Storage ou AWS S3). Limitação: a Vercel recusa requisições acima de 4,5 MB, o que impede enviar fotos grandes, vídeos e modelos 3D pelo painel. Por isso esta não é a opção recomendada.
 
 ## Demonstração no GitHub Pages
 
@@ -98,9 +102,9 @@ A imagem de produção é construída e testada pelo workflow `.github/workflows
 **Não testado:**
 
 - aparelhos físicos: a parte móvel foi validada por emulação no navegador, sem iPhone ou Android reais;
-- driver S3 e banco Turso: o código existe, mas não foi executado contra serviços reais;
+- driver S3: o código existe, mas não foi executado contra um serviço real;
 - envio real de e-mail pelo Resend: sem a chave, o link de recuperação aparece no log do servidor, e foi assim que o fluxo foi testado;
-- publicação real na Railway ou em domínio próprio.
+- domínio próprio e publicação na Railway.
 
 **Limitações conhecidas:**
 

@@ -1,4 +1,4 @@
-import { index, integer, primaryKey, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core'
+import { blob, index, integer, primaryKey, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core'
 
 const now = () => Date.now()
 const timestamps = {
@@ -34,6 +34,13 @@ export const loginAttempts = sqliteTable('login_attempts', {
   count: integer('count').notNull(),
   windowStart: integer('window_start').notNull(),
 })
+
+// Usada só com STORAGE_DRIVER=database, em hospedagens sem disco persistente.
+export const mediaChunks = sqliteTable('media_chunks', {
+  key: text('key').notNull(),
+  part: integer('part').notNull(),
+  data: blob('data', { mode: 'buffer' }).notNull(),
+}, (t) => [primaryKey({ columns: [t.key, t.part] })])
 
 export const media = sqliteTable('media', {
   id: text('id').primaryKey(),

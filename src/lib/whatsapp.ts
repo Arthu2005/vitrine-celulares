@@ -6,7 +6,7 @@ export function siteUrl() {
   const built = process.env.NEXT_PUBLIC_SITE_URL
   if (typeof window !== 'undefined') return (built || window.location.origin).replace(/\/$/, '')
   const railway = process.env.RAILWAY_PUBLIC_DOMAIN
-  return (process.env.SITE_URL || (railway && `https://${railway}`) || built || 'http://localhost:3000').replace(/\/$/, '')
+  return (process.env.SITE_URL || process.env.RENDER_EXTERNAL_URL || (railway && `https://${railway}`) || built || 'http://localhost:3000').replace(/\/$/, '')
 }
 
 export const DEFAULT_TEMPLATE = 'Olá! Tenho interesse no {produto}. Gostaria de saber o preço, as cores disponíveis, a condição e as formas de pagamento.\n{link}'

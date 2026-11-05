@@ -18,7 +18,7 @@ const reset = process.argv.includes('--reset')
 const noDemo = process.argv.includes('--sem-demo')
 
 if (reset) {
-  for (const table of [schema.products, schema.productVariants, schema.productMedia, schema.accessoryLinks, schema.collectionProducts, schema.media, schema.brands, schema.categories, schema.collections, schema.settings, schema.events, schema.auditLog]) {
+  for (const table of [schema.products, schema.productVariants, schema.productMedia, schema.accessoryLinks, schema.collectionProducts, schema.media, schema.mediaChunks, schema.brands, schema.categories, schema.collections, schema.settings, schema.events, schema.auditLog]) {
     await db.delete(table)
   }
   rmSync(process.env.STORAGE_LOCAL_DIR || './storage', { recursive: true, force: true })

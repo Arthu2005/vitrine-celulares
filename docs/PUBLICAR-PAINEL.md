@@ -1,45 +1,48 @@
 # Publicar o site com o painel
 
-Este guia coloca o site completo, com `/admin`, em um endereço público na [Railway](https://railway.com). A hospedagem roda o servidor e guarda o banco e as fotos em um disco persistente. O preço e os limites do plano mudam com o tempo: confira em [docs.railway.com/pricing/plans](https://docs.railway.com/pricing/plans) antes de assinar.
+Este guia coloca o site completo, com `/admin`, em um endereço público usando dois serviços com plano grátis:
 
-Os nomes dos botões podem mudar um pouco. O que importa são os valores abaixo.
+- [Render](https://render.com/docs/free): roda o servidor;
+- [Turso](https://turso.tech/pricing): guarda o banco e as fotos.
 
-## 1. Criar o projeto
+Os limites dos planos grátis mudam com o tempo. Confira as páginas acima antes de contar com eles.
 
-1. Entre em railway.com com a sua conta do GitHub.
-2. Crie um projeto com **Deploy from GitHub repo** e escolha `Arthu2005/vitrine-celulares`.
-3. Confirme que a branch do serviço é `main`.
+## O que esperar do plano grátis
 
-O primeiro deploy vai falhar, e isso é esperado: ainda faltam a senha e o disco.
+- **Primeiro acesso lento:** depois de 15 minutos sem visitas, o servidor dorme. O próximo visitante espera cerca de 1 minuto até o site abrir.
+- **Limite de horas:** são 750 horas por mês. Se acabarem, o site fica fora do ar até o mês seguinte.
+- **Limite de dados:** o plano grátis do Turso tem cerca de 5 GB. Ao passar dos limites, é preciso assinar um plano pago.
 
-## 2. Definir as variáveis
+Serve para testar e mostrar o painel. Para uma loja recebendo clientes, a espera do primeiro acesso costuma compensar um plano pago.
 
-Na aba **Variables** do serviço, crie:
+## 1. Criar o banco no Turso
+
+1. Entre em turso.tech com a sua conta do GitHub.
+2. Crie um banco de dados.
+3. Copie o endereço dele, que começa com `libsql://`.
+4. Gere um token de acesso e copie o valor. Trate esse token como uma senha.
+
+## 2. Criar o serviço na Render
+
+1. Entre em render.com com a sua conta do GitHub e autorize o repositório `Arthu2005/vitrine-celulares`.
+2. Crie um **Blueprint** a partir desse repositório. Ele lê o arquivo `render.yaml`.
+3. Preencha os valores pedidos:
 
 | Variável | Valor |
 | --- | --- |
+| `DATABASE_URL` | O endereço `libsql://` do Turso |
+| `DATABASE_AUTH_TOKEN` | O token do Turso |
 | `ADMIN_EMAIL` | O e-mail que você vai usar para entrar |
 | `ADMIN_PASSWORD` | Uma senha com 12 caracteres ou mais |
-| `PORT` | `3000` |
 
 Sem a senha, o site se recusa a iniciar pela primeira vez. Não use uma senha que você já usa em outro lugar.
 
-## 3. Criar o disco
+## 3. Abrir o painel
 
-Adicione um **Volume** ao serviço, com o caminho de montagem exatamente assim:
-
-```text
-/data
-```
-
-Sem esse disco, produtos, fotos e contas somem a cada nova publicação.
-
-## 4. Gerar o endereço
-
-Em **Settings > Networking**, use **Generate Domain** com a porta `3000`. Aguarde o deploy terminar e abra:
+Aguarde o deploy terminar e abra o endereço mostrado pela Render, acrescentando `/admin`:
 
 ```text
-https://SEU-ENDERECO.up.railway.app/admin
+https://SEU-ENDERECO.onrender.com/admin
 ```
 
 Entre com o e-mail e a senha da etapa 2. Depois do primeiro acesso, apague `ADMIN_PASSWORD` das variáveis: ela só é usada para criar o administrador.
@@ -47,11 +50,11 @@ Entre com o e-mail e a senha da etapa 2. Depois do primeiro acesso, apague `ADMI
 ## Depois de publicar
 
 - **Dados de demonstração:** o site começa com aparelhos fictícios para você ver tudo funcionando. Veja em [GUIA-DO-PROPRIETARIO.md](GUIA-DO-PROPRIETARIO.md) como revisar a loja e removê-los antes de divulgar.
-- **Novas versões:** cada envio para a branch `main` publica o site de novo. Os dados ficam no disco e não são apagados.
+- **Novas versões:** cada envio para a branch configurada publica o site de novo. Os dados ficam no Turso e não são apagados.
 - **Esqueci a senha:** sem o [Resend](https://resend.com) configurado, o link de recuperação aparece nos logs do serviço, não no seu e-mail. Para receber por e-mail, defina `RESEND_API_KEY` e `EMAIL_FROM`.
-- **Domínio próprio:** adicione o domínio em **Networking** e crie a variável `SITE_URL=https://seudominio.com.br`.
-- **Backup:** o disco não é uma cópia de segurança. Antes de grandes mudanças, faça uma cópia do volume pela Railway.
+- **Domínio próprio:** adicione o domínio na Render e crie a variável `SITE_URL=https://seudominio.com.br`.
+- **Backup:** o Turso guarda o banco e as fotos juntos. Antes de grandes mudanças, faça uma cópia do banco por lá.
 
-## Em outra hospedagem
+## Com um plano pago
 
-O `Dockerfile` funciona em qualquer serviço com contêiner e disco persistente. Monte o disco em `/data` e defina `ADMIN_EMAIL`, `ADMIN_PASSWORD` e `SITE_URL`. Rode só uma cópia do servidor por vez, porque o banco é um arquivo nesse disco.
+Com disco persistente, o site não dorme e as fotos ficam em arquivos comuns. O `Dockerfile` funciona na Railway (`railway.json`) ou em qualquer serviço com contêiner e disco. Monte o disco em `/data`, defina `ADMIN_EMAIL`, `ADMIN_PASSWORD` e, fora da Railway e da Render, `SITE_URL`. Rode só uma cópia do servidor por vez, porque o banco é um arquivo nesse disco.
