@@ -2,6 +2,7 @@
 
 import { ArrowDown, ArrowUp, Box, Copy, ExternalLink, Film, Plus, Trash2, X } from 'lucide-react'
 import dynamic from 'next/dynamic'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useMemo, useState, useTransition } from 'react'
 import { saveProduct } from '@/app/admin/actions'
@@ -91,6 +92,12 @@ export function ProductEditor({ id, initial, status, pendingDraft, brands, categ
   const addMedia = (rows: MediaRow[], role: 'gallery' | 'spin') => {
     remember(rows)
     set('media', [...form.media, ...rows.filter((r) => !form.media.some((m) => m.mediaId === r.id && m.role === role)).map((r) => ({ mediaId: r.id, role, color: '' }))])
+  }
+  // Os envios chegam um a um: a atualização funcional evita perder quadros da sequência.
+  const appendSpin = (row: MediaRow) => {
+    remember([row])
+    setForm((f) => ({ ...f, media: [...f.media, { mediaId: row.id, role: 'spin' as const, color: '' }] }))
+    setDirty(true)
   }
   const moveMedia = (mediaId: string, dir: -1 | 1) => {
     const list = [...gallery]
@@ -279,10 +286,14 @@ export function ProductEditor({ id, initial, status, pendingDraft, brands, categ
           )}
           <div className="border-t border-line pt-4">
             <p className="text-[15px]">Visualização em 360° por fotos</p>
-            <p className="text-[13px] text-silver-3">Alternativa ao modelo 3D: envie de 12 a 36 fotos, em ordem, girando o aparelho. {spin.length > 0 && `${spin.length} quadros adicionados.`}</p>
+            <p className="text-[13px] text-silver-3">
+              Mostra a unidade real girando: de 12 a 36 fotos tiradas em volta do aparelho. {spin.length > 0 && `${spin.length} quadros adicionados. `}
+              <Link href="/admin/guia-de-captura#giro-360" className="underline">Como fotografar</Link>
+            </p>
             <div className="mt-2 flex flex-wrap gap-2">
-              <button type="button" onClick={() => setPicker('spin')} className="btn btn-secondary">
-                Escolher quadros
+              <UploadButton kind="image" sortByName label="Enviar sequência 360°" onUploaded={appendSpin} />
+              <button type="button" onClick={() => setPicker('spin')} className="btn btn-quiet">
+                Escolher da biblioteca
               </button>
               {spin.length > 0 && (
                 <button type="button" onClick={() => set('media', gallery)} className="btn btn-quiet">
@@ -294,6 +305,9 @@ export function ProductEditor({ id, initial, status, pendingDraft, brands, categ
         </Section>
 
         <Section id="modelo" title="Modelo 3D" description="Opcional. Sem modelo, a vitrine mostra a galeria e não promete rotação livre.">
+          <p className="text-[13px] text-silver-3">
+            Escaneie a própria unidade com um app que exporte GLB. <Link href="/admin/guia-de-captura#escanear" className="underline">Como escanear</Link>
+          </p>
           <div className="flex flex-wrap items-center gap-2">
             <UploadButton kind="model" multiple={false} label="Enviar GLB" onUploaded={(row) => { remember([row]); set('modelMediaId', row.id) }} />
             {form.modelMediaId && (

@@ -1,6 +1,6 @@
 'use client'
 
-import { BarChart3, FolderTree, Home, ImageIcon, LayoutTemplate, LogOut, Menu, Settings, Smartphone, Users, X } from 'lucide-react'
+import { BarChart3, Camera, FolderTree, Home, ImageIcon, LayoutTemplate, LogOut, Menu, Settings, Smartphone, Users, X } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -11,6 +11,7 @@ const NAV = [
   { href: '/admin', label: 'Resumo', icon: BarChart3 },
   { href: '/admin/produtos', label: 'Produtos', icon: Smartphone },
   { href: '/admin/midia', label: 'Mídia e 3D', icon: ImageIcon },
+  { href: '/admin/guia-de-captura', label: 'Guia de captura', icon: Camera },
   { href: '/admin/catalogo', label: 'Marcas e coleções', icon: FolderTree },
   { href: '/admin/pagina-inicial', label: 'Página inicial', icon: LayoutTemplate },
   { href: '/admin/configuracoes', label: 'Configurações', icon: Settings },

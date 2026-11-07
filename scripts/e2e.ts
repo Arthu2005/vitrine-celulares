@@ -316,6 +316,23 @@ async function main() {
     await after.getByRole('heading', { name: 'Aparelho Teste E2E Editado', level: 1 }).waitFor()
     await after.close()
   })
+  await step('sequência 360° enviada de uma vez fica na ordem dos nomes', async () => {
+    // Fora de ordem de propósito: q1 (vermelho) precisa virar o primeiro quadro.
+    const colors: Record<string, string> = { 'q10.jpg': '#0000ff', 'q2.jpg': '#00ff00', 'q1.jpg': '#ff0000' }
+    const frames = Object.keys(colors).map((name) => join(TMP, name))
+    await Promise.all(Object.entries(colors).map(([name, background]) => sharp({ create: { width: 600, height: 800, channels: 3, background } }).jpeg().toFile(join(TMP, name))))
+    await page.locator('input[aria-label="Enviar sequência 360°"]').setInputFiles(frames)
+    await page.getByText('3 quadros adicionados').waitFor({ timeout: 60_000 })
+    await page.getByRole('button', { name: 'Publicar' }).click()
+    await page.getByText('Publicado na vitrine.').waitFor()
+    const p = await ctx.newPage()
+    await p.goto(`${BASE}/celulares/aparelho-teste-e2e`)
+    await p.getByRole('tab', { name: '360°' }).click()
+    const src = await p.locator('[role=slider] img').first().getAttribute('src')
+    const { dominant } = await sharp(Buffer.from(await (await fetch(`${BASE}${src}`)).arrayBuffer())).stats()
+    assert(dominant.r > 200 && dominant.g < 80 && dominant.b < 80, `primeiro quadro não é q1: ${JSON.stringify(dominant)}`)
+    await p.close()
+  })
   await step('dados continuam salvos depois de reiniciar o servidor', async () => {
     await stopServer(server)
     server = startServer()
@@ -487,7 +504,7 @@ async function responsive() {
       await step(`${label}: ${url}`, () => noOverflow(page, url))
     }
     await login(page)
-    for (const url of ['/admin', '/admin/produtos', '/admin/produtos/novo', '/admin/midia', '/admin/catalogo', '/admin/pagina-inicial', '/admin/configuracoes', '/admin/usuarios']) {
+    for (const url of ['/admin', '/admin/produtos', '/admin/produtos/novo', '/admin/midia', '/admin/guia-de-captura', '/admin/catalogo', '/admin/pagina-inicial', '/admin/configuracoes', '/admin/usuarios']) {
       await step(`${label}: ${url}`, () => noOverflow(page, url))
     }
     await ctx.close()

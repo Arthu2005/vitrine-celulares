@@ -17,7 +17,7 @@ const ACCEPT = {
 
 type Kind = 'image' | 'video' | 'model'
 
-export function UploadButton({ kind = 'all', multiple = true, onUploaded, label = 'Enviar arquivos', replaceId }: { kind?: Kind | 'all'; multiple?: boolean; onUploaded: (row: MediaRow) => void; label?: string; replaceId?: string }) {
+export function UploadButton({ kind = 'all', multiple = true, onUploaded, label = 'Enviar arquivos', replaceId, sortByName = false }: { kind?: Kind | 'all'; multiple?: boolean; onUploaded: (row: MediaRow) => void; label?: string; replaceId?: string; sortByName?: boolean }) {
   const input = useRef<HTMLInputElement>(null)
   const toast = useToast()
   const [status, setStatus] = useState<string | null>(null)
@@ -25,6 +25,8 @@ export function UploadButton({ kind = 'all', multiple = true, onUploaded, label 
   const handle = async (files: FileList | null) => {
     if (!files?.length) return
     const list = [...files]
+    // Câmeras numeram as fotos na ordem em que foram tiradas (IMG_0001, IMG_0002...).
+    if (sortByName) list.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }))
     for (const [i, file] of list.entries()) {
       const prefix = list.length > 1 ? `${i + 1} de ${list.length}: ` : ''
       try {
