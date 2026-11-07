@@ -3,6 +3,8 @@ services:
     name: vitrine-celulares
     runtime: docker
     plan: free
+    # Mesma região do banco no Turso (AWS US East), para cada consulta ser rápida.
+    region: virginia
     healthCheckPath: /
     envVars:
       - key: STORAGE_DRIVER
