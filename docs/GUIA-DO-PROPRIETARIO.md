@@ -36,7 +36,7 @@ O modelo 3D é opcional: sem ele, a vitrine usa fotos.
 - Para criar um ponto interativo, clique em **Adicionar ponto** e toque no local do aparelho.
 - Deixe **Modelo ilustrativo** ligado, a menos que o modelo seja fiel ao aparelho real.
 
-Sem modelo, você pode criar uma visualização em 360°: fotografe o aparelho girando (12 a 36 fotos) e use **Enviar sequência 360°**, em **Fotos**. O painel ordena as fotos pelo nome do arquivo.
+Sem modelo, você pode criar uma visualização em 360°: fotografe o aparelho girando (12 a 36 fotos) e use **Enviar sequência 360°**, em **Fotos**. O painel ordena as fotos pelo nome do arquivo. Logo abaixo, o analista de captura avalia nitidez, luz, reflexos, posição do aparelho e quantidade de quadros, e diz se a sequência está aprovada ou precisa ser refeita. Fotos avulsas com problema geram um aviso logo após o envio.
 
 O passo a passo para fotografar, mostrar marcas de uso e escanear em 3D a própria unidade está no painel, em **Guia de captura**.
 

@@ -323,6 +323,7 @@ async function main() {
     await Promise.all(Object.entries(colors).map(([name, background]) => sharp({ create: { width: 600, height: 800, channels: 3, background } }).jpeg().toFile(join(TMP, name))))
     await page.locator('input[aria-label="Enviar sequência 360°"]').setInputFiles(frames)
     await page.getByText('3 quadros adicionados').waitFor({ timeout: 60_000 })
+    await page.getByRole('status', { name: 'Análise da sequência 360°' }).getByText('Refaça antes de publicar').waitFor()
     await page.getByRole('button', { name: 'Publicar' }).click()
     await page.getByText('Publicado na vitrine.').waitFor()
     const p = await ctx.newPage()
@@ -332,6 +333,31 @@ async function main() {
     const { dominant } = await sharp(Buffer.from(await (await fetch(`${BASE}${src}`)).arrayBuffer())).stats()
     assert(dominant.r > 200 && dominant.g < 80 && dominant.b < 80, `primeiro quadro não é q1: ${JSON.stringify(dominant)}`)
     await p.close()
+  })
+  await step('analista aprova sequência boa e aponta o quadro tremido', async () => {
+    // Fotos sintéticas de um aparelho escuro sobre fundo claro, como pede o guia de captura.
+    const shot = async (name: string, blur = 0) => {
+      const device = Buffer.from('<svg width="360" height="760"><rect width="360" height="760" rx="40" fill="#202226"/><rect x="20" y="20" width="320" height="720" rx="30" fill="#0b0c0e"/><circle cx="80" cy="80" r="30" fill="#555"/><line x1="40" y1="500" x2="320" y2="560" stroke="#aaa" stroke-width="2"/></svg>')
+      let buf = await sharp({ create: { width: 1200, height: 1600, channels: 3, background: '#e6e6e6' } }).composite([{ input: device, left: 420, top: 420 }]).jpeg({ quality: 90 }).toBuffer()
+      if (blur) buf = await sharp(buf).blur(blur).jpeg().toBuffer()
+      const path = join(TMP, name)
+      await sharp(buf).toFile(path)
+      return path
+    }
+    const names = Array.from({ length: 12 }, (_, i) => `giro-${String(i + 1).padStart(2, '0')}.jpg`)
+    const report = page.getByRole('status', { name: 'Análise da sequência 360°' })
+    const input = page.locator('input[aria-label="Enviar sequência 360°"]')
+
+    await page.getByRole('button', { name: 'Limpar sequência' }).click()
+    await input.setInputFiles(await Promise.all(names.map((n) => shot(n))))
+    await page.getByText('12 quadros adicionados').waitFor({ timeout: 120_000 })
+    await report.getByText('Sequência aprovada').waitFor()
+
+    await page.getByRole('button', { name: 'Limpar sequência' }).click()
+    await input.setInputFiles(await Promise.all(names.map((n, i) => shot(`b-${n}`, i === 4 ? 6 : 0))))
+    await page.getByText('12 quadros adicionados').waitFor({ timeout: 120_000 })
+    await report.getByText('Tremidos ou fora de foco: quadros 5.').waitFor()
+    assert((await report.getByText('Refaça antes de publicar').count()) === 1, 'quadro tremido não reprovou a sequência')
   })
   await step('dados continuam salvos depois de reiniciar o servidor', async () => {
     await stopServer(server)

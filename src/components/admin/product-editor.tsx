@@ -10,6 +10,8 @@ import type { MediaRow } from '@/app/admin/types'
 import { AVAILABILITY, CONDITIONS, GOOD_FOR, SPEC_GROUPS } from '@/lib/constants'
 import { moneyInput, parseMoney } from '@/lib/format'
 import { slugify, type ProductInput } from '@/lib/schemas'
+import type { FrameQuality } from '@/lib/capture-quality'
+import { CaptureReport } from './capture-report'
 import { MediaPicker, MediaThumb, UploadButton } from './media-picker'
 import { Field, Section, Toggle, useDirtyGuard, useToast } from './ui'
 
@@ -291,7 +293,7 @@ export function ProductEditor({ id, initial, status, pendingDraft, brands, categ
               <Link href="/admin/guia-de-captura#giro-360" className="underline">Como fotografar</Link>
             </p>
             <div className="mt-2 flex flex-wrap gap-2">
-              <UploadButton kind="image" sortByName label="Enviar sequência 360°" onUploaded={appendSpin} />
+              <UploadButton kind="image" sortByName quietWarnings label="Enviar sequência 360°" onUploaded={appendSpin} />
               <button type="button" onClick={() => setPicker('spin')} className="btn btn-quiet">
                 Escolher da biblioteca
               </button>
@@ -301,6 +303,7 @@ export function ProductEditor({ id, initial, status, pendingDraft, brands, categ
                 </button>
               )}
             </div>
+            <CaptureReport frames={spin.map((m) => (media[m.mediaId]?.meta?.quality as FrameQuality | null | undefined) ?? null)} />
           </div>
         </Section>
 

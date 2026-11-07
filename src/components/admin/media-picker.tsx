@@ -17,7 +17,7 @@ const ACCEPT = {
 
 type Kind = 'image' | 'video' | 'model'
 
-export function UploadButton({ kind = 'all', multiple = true, onUploaded, label = 'Enviar arquivos', replaceId, sortByName = false }: { kind?: Kind | 'all'; multiple?: boolean; onUploaded: (row: MediaRow) => void; label?: string; replaceId?: string; sortByName?: boolean }) {
+export function UploadButton({ kind = 'all', multiple = true, onUploaded, label = 'Enviar arquivos', replaceId, sortByName = false, quietWarnings = false }: { kind?: Kind | 'all'; multiple?: boolean; onUploaded: (row: MediaRow) => void; label?: string; replaceId?: string; sortByName?: boolean; quietWarnings?: boolean }) {
   const input = useRef<HTMLInputElement>(null)
   const toast = useToast()
   const [status, setStatus] = useState<string | null>(null)
@@ -37,7 +37,7 @@ export function UploadButton({ kind = 'all', multiple = true, onUploaded, label 
         })
         onUploaded(row)
         const warnings = (row.meta?.warnings as string[] | undefined) ?? []
-        if (warnings.length) toast('bad', `${file.name} enviado com avisos.`, warnings)
+        if (warnings.length && !quietWarnings) toast('bad', `${file.name} enviado com avisos.`, warnings)
       } catch (error) {
         toast('bad', `${file.name}: ${error instanceof Error ? error.message : 'falha no envio.'}`)
       }

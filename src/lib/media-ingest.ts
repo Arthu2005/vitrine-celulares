@@ -1,7 +1,9 @@
 import { randomUUID } from 'node:crypto'
 import sharp from 'sharp'
 import { db, schema } from './db'
+import { frameIssues, type FrameQuality } from './capture-quality'
 import { LIMITS } from './constants'
+import { measureFrame } from './image-quality'
 import { publicUrl, putObject } from './storage'
 import type { MediaItem } from './types'
 
@@ -107,12 +109,14 @@ export async function ingest(buffer: Buffer, fileName: string, opts: { isDemo?: 
     let width: number
     let height: number
     const variants: Record<string, string> = {}
+    let quality: FrameQuality | null = null
     try {
       const pipeline = sharp(buffer, { limitInputPixels: 64_000_000 }).rotate()
       const meta = await pipeline.metadata()
       const swap = (meta.orientation ?? 1) >= 5
       width = (swap ? meta.height : meta.width) ?? 0
       height = (swap ? meta.width : meta.height) ?? 0
+      quality = await measureFrame(pipeline, width, height)
       for (const w of IMAGE_WIDTHS) {
         if (w > width && w !== IMAGE_WIDTHS[0]) continue
         const output = await pipeline.clone().resize({ width: Math.min(w, width), withoutEnlargement: true }).webp({ quality: 82, alphaQuality: 92 }).toBuffer()
@@ -125,7 +129,8 @@ export async function ingest(buffer: Buffer, fileName: string, opts: { isDemo?: 
       throw new UploadError('Não foi possível ler esta imagem. O arquivo pode estar corrompido.')
     }
     const largest = Object.keys(variants).map(Number).sort((a, b) => b - a)[0]
-    row = { ...base, kind: 'image', mime: 'image/webp', width, height, variants, storageKey: variants[largest] }
+    const warnings = quality ? frameIssues(quality) : []
+    row = { ...base, kind: 'image', mime: 'image/webp', width, height, variants, storageKey: variants[largest], meta: { quality, warnings } }
   } else if (type.kind === 'video') {
     if (buffer.length > LIMITS.video) throw new UploadError('Vídeo acima de 100 MB.')
     const key = `videos/${id}.${type.ext}`

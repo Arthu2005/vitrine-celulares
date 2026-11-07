@@ -65,6 +65,10 @@ export default function CaptureGuidePage() {
             <Step n={5} title="Envie a sequência">
               <p>No produto, em <strong className="text-silver-2">Fotos</strong>, use <strong className="text-silver-2">Enviar sequência 360°</strong> e selecione todas as fotos de uma vez. O painel põe na ordem pelo nome do arquivo, que é a ordem em que foram tiradas.</p>
             </Step>
+            <Step n={6} title="Leia o parecer do analista">
+              <p>Logo abaixo da sequência, o analista do painel confere cada quadro: nitidez, luz, reflexos, posição do aparelho e quantidade de fotos. Ele diz se a sequência está aprovada, se pode melhorar ou se precisa ser refeita, e aponta os quadros com problema.</p>
+              <p>O analista é automático e não substitui o seu olhar: antes de publicar, gire a sequência na prévia.</p>
+            </Step>
           </ol>
         </Block>
 
